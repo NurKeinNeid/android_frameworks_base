@@ -127,4 +127,11 @@
     <!-- WARP charging -->
     <string name="keyguard_indication_charging_time_warp"><xliff:g id="percentage">%2$s</xliff:g> • WARP charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%1$s</xliff:g> until full)</string>
     <string name="keyguard_plugged_in_charging_warp"><xliff:g id="percentage">%s</xliff:g> • WARP charging</string>
+
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sync</string>
+    <string name="accessibility_quick_settings_sync_off">Sync off.</string>
+    <string name="accessibility_quick_settings_sync_on">Sync on.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
 </resources>
