@@ -61,25 +61,13 @@
         android:orientation="horizontal"
         android:gravity="center_vertical|end" >
 
-    <android.widget.Space
-        android:id="@+id/space"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center_vertical|center_horizontal" />
+        <include layout="@layout/ongoing_privacy_chip" />
 
-    <include layout="@layout/ongoing_privacy_chip" />
-
-    <com.android.systemui.statusbar.policy.NetworkTraffic
-        android:id="@+id/networkTraffic"
-        android:paddingTop="@dimen/status_bar_padding_top"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:singleLine="false"
-        android:lineSpacingMultiplier="1.2"
-        systemui:showDark="false"
-        android:gravity="right|center_vertical"/>
+        <com.android.systemui.BatteryMeterView
+            android:id="@+id/battery"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:paddingStart="6dp"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
