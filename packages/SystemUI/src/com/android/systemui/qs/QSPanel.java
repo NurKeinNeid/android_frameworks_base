@@ -123,6 +123,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback,
         mDumpController = dumpController;
 
         updateResources();
+        updateSettings();
     }
 
     protected void addDivider() {
