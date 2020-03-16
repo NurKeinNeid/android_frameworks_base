@@ -831,9 +831,7 @@ public final class PowerManagerService extends SystemService
             mNativeWrapper.nativeSetAutoSuspend(false);
             mNativeWrapper.nativeSetInteractive(true);
             mNativeWrapper.nativeSetFeature(POWER_FEATURE_GESTURES, 0);
-            mNativeWrapper.nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
-            mNativeWrapper.nativeSetFeature(POWER_FEATURE_GESTURES, 0);
-            mNativeWrapper.nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
+            mNativeWrapper.nativeSetFeature(POWER_FEATURE_DOUBLE_TAP, 0);
             mNativeWrapper.nativeSetFeature(POWER_FEATURE_DRAW_V, 0);
             mNativeWrapper.nativeSetFeature(POWER_FEATURE_DRAW_INVERSE_V, 0);
             mNativeWrapper.nativeSetFeature(POWER_FEATURE_DRAW_O, 0);
