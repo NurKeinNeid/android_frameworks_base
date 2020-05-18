@@ -34,8 +34,10 @@ import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,11 +49,15 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.Dependency;
+
+import vendor.aospa.biometrics.fingerprint.inscreen.V1_0.IFingerprintInscreen;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Contains the Biometric views (title, subtitle, icon, buttons, etc) and its controllers.
@@ -197,6 +203,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
     protected final PackageManager mPackageManager;
     protected boolean mHasFod;
+    private IFingerprintInscreen mFingerprintInscreenDaemon;
 
     /**
      * Delay after authentication is confirmed, before the dialog should be animated away.
@@ -266,6 +273,7 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mPackageManager = context.getPackageManager();
         mHasFod = mPackageManager.hasSystemFeature(FOD);
+        mFingerprintInscreenDaemon = getFingerprintInScreenDaemon();
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
 
@@ -280,6 +288,22 @@ public abstract class AuthBiometricView extends LinearLayout {
             handleResetAfterHelp();
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         };
+    }
+
+    public IFingerprintInscreen getFingerprintInScreenDaemon() {
+        if (mFingerprintInscreenDaemon == null) {
+            try {
+                mFingerprintInscreenDaemon = IFingerprintInscreen.getService();
+                if (mFingerprintInscreenDaemon != null) {
+                    mFingerprintInscreenDaemon.asBinder().linkToDeath((cookie) -> {
+                        mFingerprintInscreenDaemon = null;
+                    }, 0);
+                }
+            } catch (NoSuchElementException | RemoteException e) {
+                // do nothing
+            }
+        }
+        return mFingerprintInscreenDaemon;
     }
 
     public void setPanelController(AuthPanelController panelController) {
@@ -652,17 +676,19 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         if (this instanceof AuthBiometricFingerprintView) {
             if (mHasFod) {
-                final int navbarHeight = getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
+                DisplayMetrics dm = Dependency.get(DisplayMetrics.class);
                 final int fodMargin = getResources().getDimensionPixelSize(
-                        R.dimen.biometric_dialog_fod_margin);
+                        R.dimen.biometric_dialog_fod_default);
 
                 mIconView.setVisibility(View.INVISIBLE);
                 // The view is invisible, so it still takes space and
                 // we use that to adjust for the FOD
-                mIconView.setPadding(0, 0, 0, fodMargin - navbarHeight);
-
-                // Add Errortext above the biometric icon
+                try{
+                    mIconView.setPadding(0, 0, 0, dm.heightPixels - mFingerprintInscreenDaemon.getPositionY() + mFingerprintInscreenDaemon.getSize() - fodMargin);
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Failed to retrieve FOD circle position or size");
+                }
+                // Add IndicatorView above the biometric icon
                 this.removeView(mIndicatorView);
                 this.addView(mIndicatorView, this.indexOfChild(mIconView));
             } else {
