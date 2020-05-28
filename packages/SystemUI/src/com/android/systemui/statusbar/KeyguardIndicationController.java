@@ -38,6 +38,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -117,8 +118,11 @@ public class KeyguardIndicationController implements StateListener,
     private boolean mPowerPluggedInWired;
     private boolean mPowerCharged;
     private int mChargingSpeed;
-    private int mChargingWattage;
+    private int mChargingCurrent;
+    private double mChargingVoltage;
+    private double mChargingWattage;
     private int mBatteryLevel;
+    private int mTemperature;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -538,7 +542,7 @@ public class KeyguardIndicationController implements StateListener,
                     : R.string.keyguard_plugged_in_wireless;
         }
 
-        String percentage = NumberFormat.getPercentInstance()
+        String batteryInfo = NumberFormat.getPercentInstance()
                 .format(mBatteryLevel / 100f);
         if (hasChargingTime) {
             // We now have battery percentage in these strings and it's expected that all
@@ -547,19 +551,39 @@ public class KeyguardIndicationController implements StateListener,
             String chargingTimeFormatted = Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                     mContext, chargingTimeRemaining);
             try {
-                return mContext.getResources().getString(chargingId, chargingTimeFormatted,
-                        percentage);
+                batteryInfo = mContext.getResources().getString(chargingId, chargingTimeFormatted,
+                        batteryInfo);
             } catch (IllegalFormatConversionException e) {
-                return mContext.getResources().getString(chargingId, chargingTimeFormatted);
+                batteryInfo = mContext.getResources().getString(chargingId, chargingTimeFormatted);
             }
         } else {
             // Same as above
             try {
-                return mContext.getResources().getString(chargingId, percentage);
+                batteryInfo = mContext.getResources().getString(chargingId, batteryInfo);
             } catch (IllegalFormatConversionException e) {
-                return mContext.getResources().getString(chargingId);
+                batteryInfo = mContext.getResources().getString(chargingId);
             }
         }
+
+        batteryInfo += "\n";
+        if (mChargingCurrent > 0) {
+            batteryInfo += (mChargingCurrent < 5 ? (mChargingCurrent * 1000) :
+                    (mChargingCurrent < 4000 ? mChargingCurrent :
+                    (mChargingCurrent / 1000))) + "mA" ;
+        }
+        if (mChargingVoltage > 0) {
+            batteryInfo += (mChargingCurrent > 0 ? " • " : "") +
+                    String.format("%.1f", (mChargingVoltage / 1000 / 1000)) + "V";
+        }
+        if (mChargingWattage > 0) {
+            batteryInfo += (mChargingVoltage > 0 ? " • " : (mChargingCurrent > 0 ? " • " : ""))
+                    + String.format("%.1f", (mChargingWattage / 1000 / 1000)) + "W";
+        }
+        if (mTemperature > 0) {
+            batteryInfo += (mChargingWattage > 0 ? " • " : (mChargingVoltage > 0 ? " • " :
+                    (mChargingCurrent > 0 ? " • " : ""))) + mTemperature / 10 + "°C";
+        }
+        return batteryInfo;
     }
 
     public void setStatusBarKeyguardViewManager(
@@ -660,7 +684,10 @@ public class KeyguardIndicationController implements StateListener,
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
+            mChargingCurrent = status.maxChargingCurrent;
+            mChargingVoltage = status.maxChargingVoltage;
             mChargingWattage = status.maxChargingWattage;
+            mTemperature = status.temperature;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
             updateIndication(!wasPluggedIn && mPowerPluggedInWired);
