@@ -520,6 +520,11 @@ public class KeyguardIndicationController implements StateListener,
         int chargingId;
         if (mPowerPluggedInWired) {
             switch (mChargingSpeed) {
+                case KeyguardUpdateMonitor.BatteryStatus.CHARGING_WARP:
+                    chargingId = hasChargingTime
+                            ? R.string.keyguard_indication_charging_time_warp
+                            : R.string.keyguard_plugged_in_charging_warp;
+                    break;
                 case KeyguardUpdateMonitor.BatteryStatus.CHARGING_FAST:
                     chargingId = hasChargingTime
                             ? R.string.keyguard_indication_charging_time_fast
@@ -563,6 +568,10 @@ public class KeyguardIndicationController implements StateListener,
             } catch (IllegalFormatConversionException e) {
                 batteryInfo = mContext.getResources().getString(chargingId);
             }
+        }
+
+        if (mChargingSpeed == KeyguardUpdateMonitor.BatteryStatus.CHARGING_WARP) {
+            return batteryInfo;
         }
 
         batteryInfo += "\n";
