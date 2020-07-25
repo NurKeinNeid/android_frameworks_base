@@ -150,4 +150,7 @@
     <java-symbol type="bool" name="config_hasVariableRefreshRate" />
 
     <java-symbol type="string" name="volume_dialog_ringer_guidance_normal" />
+
+    <!-- DC Dimming -->
+    <java-symbol type="string" name="config_deviceDcDimmingSysfsNode" />
 </resources>
