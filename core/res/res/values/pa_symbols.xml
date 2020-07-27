@@ -148,4 +148,6 @@
 
     <!-- Whether device supports variable refresh rate -->
     <java-symbol type="bool" name="config_hasVariableRefreshRate" />
+
+    <java-symbol type="string" name="volume_dialog_ringer_guidance_normal" />
 </resources>
